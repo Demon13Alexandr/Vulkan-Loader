@@ -35,9 +35,8 @@ install:
 build_script:
 - cmake --build . --config Release --target install
 
-- ps: | # package artifacts
- 7z a -m0=LZMA2 -mx9 $env:BUILD .\build\*
+- ps 7z a -m0=LZMA2 -mx9 $env:BUILD .\build\*
  
 artifacts:
 - path: $(BUILD)
-  name: rpcs3
+  name: vksdk
