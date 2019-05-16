@@ -1,0 +1,48 @@
+os: Visual Studio 2017
+platform: x64
+clone_folder: C:\projects\vulkan-loader
+shallow_clone: true
+
+environment:
+  VULKAN_SDK: "C:\\VulkanSDK\\1.1.106.0"
+  VULKAN_SDK_URL: https://sdk.lunarg.com/sdk/download/1.1.106.0/windows/VulkanSDK-1.1.106.0-Installer.exe
+
+configuration:
+  - Release
+  init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  
+install:
+- ps: 
+
+  python scripts/update_deps.py --dir=external  
+  git clone https://github.com/google/googletest.git external/googletest
+
+  mkdir build
+  cd build
+  cmake -A x64  -DVULKAN_HEADERS_INSTALL_DIR=C:\VulkanSDK\1.1.106.0\ -G "Visual Studio 14 2015 Win64" ..
+  
+- ps: | # initialize mirror arrays and fetch precompiled build dependencies
+    $VULKAN_SDK_URLS = @(
+        $env:VULKAN_SDK_URL;
+        "$($env:VULKAN_SDK_URL)?Human=true";
+    )
+        if (!(test-path vulkan-sdk.exe))
+    {
+        foreach ($url in $VULKAN_SDK_URLS) {
+            irm $url -outfile vulkan-sdk.exe
+            
+        }
+    }
+    .\vulkan-sdk.exe /S
+    
+build_script:
+cmake --build . --config Release --target install
+
+- ps: | # package artifacts
+ 7z a -m0=LZMA2 -mx9 $env:BUILD .\build\*
+ 
+ artifacts:
+- path: $(BUILD)
+  name: rpcs3
+
