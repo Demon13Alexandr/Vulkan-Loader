@@ -16,8 +16,8 @@ install:
 - mkdir build
 - ps: 
   python scripts/update_deps.py --dir=external  
-  cd build
-  cmake -A x64  -DVULKAN_HEADERS_INSTALL_DIR=C:\VulkanSDK\1.1.106.0\ -G "Visual Studio 14 2015 Win64" ..
+- cd build
+- cmake -A x64  -DVULKAN_HEADERS_INSTALL_DIR=C:\VulkanSDK\1.1.106.0\ -G "Visual Studio 14 2015 Win64" ..
   
 - ps: | # initialize mirror arrays and fetch precompiled build dependencies
     $VULKAN_SDK_URLS = @(
@@ -34,7 +34,7 @@ install:
     .\vulkan-sdk.exe /S
     
 build_script:
-cmake --build . --config Release --target install
+- cmake --build . --config Release --target install
 
 - ps: | # package artifacts
  7z a -m0=LZMA2 -mx9 $env:BUILD .\build\*
